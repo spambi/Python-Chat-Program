@@ -2,6 +2,7 @@
 ATM creates a way to put in text to a screen
 Will change it to a client for the server and hvae the server console based, so it should be ez to implement on this
 """
+
 import wx
 import socket
 
@@ -11,6 +12,13 @@ welcome_msg = "Welcome to Pype %s, this is a python based chat program that uses
 msg_dbase = []
 
 
+class Client:
+    """ This is what connects to the server, made as a class so multiple clients can run
+    """
+    ip = 'localhost'
+    port = 4132
+
+
 class SimpleGUI(wx.Frame):
     """ This is the main GUI for PyPe
     """
@@ -18,7 +26,6 @@ class SimpleGUI(wx.Frame):
     def __init__(self, *args, **kwargs):
         super(SimpleGUI, self).__init__(*args, **kwargs)
 
-        messages = [] 
         self.init_ui()
         self.SetSize(1280, 640)
         self.Center()
