@@ -1,0 +1,3 @@
+* Python Chat Program
+This is a chat program that uses low level sockets in python and wxPython to create a chat program
+* WIP
