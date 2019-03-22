@@ -1,5 +1,4 @@
-"""
-ATM creates a way to put in text to a screen
+""" ATM creates a way to put in text to a screen
 Will change it to a client for the server and hvae the server console based, so it should be ez to implement on this
 """
 
@@ -15,8 +14,20 @@ msg_dbase = []
 class Client:
     """ This is what connects to the server, made as a class so multiple clients can run
     """
-    ip = 'localhost'
-    port = 4132
+    
+
+    IP = 'localhost'
+    PORT = 4132
+
+    def connect_server(self, ip, port):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((IP, PORT)) 
+        print 'Connected to %s' % IP
+        s.sendall(msg_dbase[-1])
+        print 'sent the shit lol'
+    
+   
+
 
 
 class SimpleGUI(wx.Frame):
@@ -71,6 +82,7 @@ class SimpleGUI(wx.Frame):
         # into a string
         # Fuck that took too long xD
         #msgs.append(t_ctrl2.GetLineText(1))
+        # i dont get lambda
         panel.Bind(wx.EVT_BUTTON, lambda evt: self.send_message_gui(t_ctrl1, t_ctrl2), button1)
         #panel.Bind(wx.EVT_BUTTON, msgs.append(t_ctrl2), button1)
         panel.Bind(wx.EVT_CLOSE, self.closewindow)
@@ -111,10 +123,6 @@ if __name__ == '__main__':
     # Connect to a server
     
     APP.MainLoop()
-    IP = '127.0.0.1'
-    PORT = 4121
-    BF_SZ = 1024
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((IP, PORT))
-    s.sendall(msg_dbase[-1])
-    print 'sent the shit lol'
+    serv1 = Client
+    Client.serv1.connect_server(Client, '127.0.0.1', 4132)
+    
