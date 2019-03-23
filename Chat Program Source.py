@@ -44,6 +44,21 @@ class SimpleGUI(wx.Frame):
     def init_ui(self):
         """ This is the actual UI
         """
+
+        # Menubar
+        menubar = wx.MenuBar()
+        fileMenu = wx.Menu()
+
+        fileConnServ = fileMenu.Append(wx.ID_ANY, 'Connect', 'Connect to a new serveer')
+        fileItem = fileMenu.Append(wx.ID_EXIT, 'Quit', 'Quit Application')
+
+        menubar.Append(fileMenu, '&File')
+        self.SetMenuBar(menubar)
+
+        self.Bind(wx.EVT_MENU, self.closewindow, fileItem)
+        
+
+
         panel = wx.Panel(self)
 
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -91,6 +106,8 @@ class SimpleGUI(wx.Frame):
         vbox.Add((-1, 10))
 
         panel.SetSizer(vbox)
+
+
  
     def send_msg_server(self, msg):
         serv1 = Client('127.0.0.1', 4132)
@@ -110,26 +127,23 @@ class SimpleGUI(wx.Frame):
         print msgs
 
 
-    def closewindow(self, event):
+    def closewindow(self, e):
         """
             This destroys the window
         """
         self.Destroy()
-        #  return test_array_str
-        #  Put in the words, will make this dynamic by using the text box
-
     
 if __name__ == '__main__':
-    #APP = wx.App()
-    #GUI1 = SimpleGUI(None, title='testing')
-    #GUI1.Show()
+    APP = wx.App()
+    GUI1 = SimpleGUI(None, title='testing')
+    GUI1.Show()
 
     # Connect to a server
     
-    #APP.MainLoop()
+    APP.MainLoop()
     
     
-    client1 = Client('127.0.0.1', 4132)
-    client1.connect_to_server()
-    client1.send_msg_server('ayyy')
-    client1.s.close()
+    #client1 = Client('127.0.0.1', 4132)
+    #client1.connect_to_server()
+    #client1.send_msg_server('ayyy')
+    #client1.s.close()
