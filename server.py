@@ -8,8 +8,12 @@ PORT = 4132
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((IP, PORT))
-s.listen(1)
+s.listen(5)
 conn, addr = s.accept()
-print '%s: Connected' % addr
-fuck = conn.recv(1024)
-print fuck
+#print '%s: Connected' % addr
+while 1:
+	try:
+		data = conn.recv(1024)
+		print data
+	except:
+		print "An error occured"

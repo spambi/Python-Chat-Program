@@ -14,17 +14,25 @@ msg_dbase = []
 class Client:
     """ This is what connects to the server, made as a class so multiple clients can run
     """
-    
+    def __init__(self, IP, PORT):
+        self.IP = IP
+        self.PORT = PORT
+        self.SERVERS = []
+        
+        
 
-    IP = 'localhost'
-    PORT = 4132
-
-    def connect_server(self, ip, port):
+   
+    def connect_server(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((IP, PORT)) 
-        print 'Connected to %s' % IP
+        s.connect((self.IP, self.PORT)) 
+        print 'Connected to %s' % self.IP
         s.sendall(msg_dbase[-1])
         print 'sent the shit lol'
+    #def create_server(self):
+
+
+
+
     
    
 
@@ -91,7 +99,10 @@ class SimpleGUI(wx.Frame):
         vbox.Add((-1, 10))
 
         panel.SetSizer(vbox)
-
+ 
+    def send_msg_server(self, msg):
+        serv1 = Client('127.0.0.1', 4132)
+        serv1.connect_server()
 
     def send_message_gui(self, txtbox, new_msg):
         """
@@ -102,6 +113,7 @@ class SimpleGUI(wx.Frame):
         msg_dbase.append(msgs)
         # Pretty ugly, but have to put the % after %s cause it won't work otherwise
         txtbox.AppendText("%s: " % username + msgs + '\n') 
+        self.send_msg_server(msgs)
         new_msg.Clear()
         print msgs
 
@@ -123,6 +135,5 @@ if __name__ == '__main__':
     # Connect to a server
     
     APP.MainLoop()
-    serv1 = Client
-    Client.serv1.connect_server(Client, '127.0.0.1', 4132)
+    
     
