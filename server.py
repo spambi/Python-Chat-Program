@@ -11,9 +11,5 @@ s.bind((IP, PORT))
 s.listen(5)
 conn, addr = s.accept()
 #print '%s: Connected' % addr
-while 1:
-	try:
-		data = conn.recv(1024)
-		print data
-	except:
-		print "An error occured"
+data = conn.recv(1024)
+print data

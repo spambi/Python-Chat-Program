@@ -17,25 +17,17 @@ class Client:
     def __init__(self, IP, PORT):
         self.IP = IP
         self.PORT = PORT
-        self.SERVERS = []
+        self.s = None      
         
-        
-
-   
-    def connect_server(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.IP, self.PORT)) 
-        print 'Connected to %s' % self.IP
-        s.sendall(msg_dbase[-1])
-        print 'sent the shit lol'
-    #def create_server(self):
-
-
-
-
-    
-   
-
+    # Each class run thing creates a now socket lol
+    def connect_to_server(self):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect((self.IP, self.PORT)) 
+        #print 'Connected to %s' % self.IP
+        #s.sendall(msg_dbase[-1])
+        #print 'sent the shit lol' 
+    def send_msg_server(self, msg):
+        self.s.sendall(msg)
 
 
 class SimpleGUI(wx.Frame):
@@ -128,12 +120,16 @@ class SimpleGUI(wx.Frame):
 
     
 if __name__ == '__main__':
-    APP = wx.App()
-    GUI1 = SimpleGUI(None, title='testing')
-    GUI1.Show()
+    #APP = wx.App()
+    #GUI1 = SimpleGUI(None, title='testing')
+    #GUI1.Show()
 
     # Connect to a server
     
-    APP.MainLoop()
+    #APP.MainLoop()
     
     
+    client1 = Client('127.0.0.1', 4132)
+    client1.connect_to_server()
+    client1.send_msg_server('ayyy')
+    client1.s.close()
