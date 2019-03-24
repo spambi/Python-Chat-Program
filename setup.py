@@ -1,6 +1,6 @@
 from cx_Freeze import setup, Executable
 
-setup(name='gui_base',
+setup(name='Chat Program Python Client',
       version='0.1',
-      description='PyPe',
-      executables=[Executable("PyPe.py")])
+      description='aylmao',
+      executables=[Executable("Chat Program Source.py")])

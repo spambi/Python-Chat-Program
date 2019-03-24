@@ -2,8 +2,11 @@
 Will change it to a client for the server and hvae the server console based, so it should be ez to implement on this
 """
 
-import wx
 import socket
+import time
+import threading
+import wx
+
 
 msgs =  ''
 username = 'spambi'
@@ -20,15 +23,33 @@ class Client:
         self.PORT = PORT
         self.s = None      
         
-    # Each class run thing creates a now socket lol
-    def connect_to_server(self, e):
+    # Each class run thing creates a now socketsket lol
+    def connect_to_server(self):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((self.IP, self.PORT)) 
         serv_socks.append(self.s)
-        #print 'Connected to %s' % self.IP
-        #s.sendall(msg_dbase[-1])
-        #print 'sent the shit lol' 
-    def send_msg_server(self, msg):
+        print 'Connected to %s' % self.IP
+
+        #new_client = SimpleGUI('newclient', None, title='New Client')
+        #APP = wx.App()
+        #new_client.Show()
+        #APP.MainLoop()
+
+   # def connect_serv_new_client(self):
+   #     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+   #     self.s.connect((self.IP, self.PORT)) 
+   #     serv_socks.append(self.s)
+   #     print 'Connected to %s' % self.IP
+#
+   #     new_client = SimpleGUI('newclient', None, title='{}:{}'.format(self.IP, self.PORT))
+   #     new_client.IP = self.IP
+   #     new_client.PORT = self.PORT
+   #     APP = wx.App()
+   #     new_client.Show()
+   #     APP.MainLoop()
+
+
+    def send_msg(self, msg):
         self.s.sendall(msg)
 
 
@@ -36,12 +57,21 @@ class SimpleGUI(wx.Frame):
     """ This is the main GUI for PyPe
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, threadname, *args, **kwargs):
         super(SimpleGUI, self).__init__(*args, **kwargs)
+
+        # Create a seperate thread here so multiple clients can be run +-+
+        self.t = threading.Thread(target = self.init_ui, name = threadname)
+        self.t.start()
 
         self.init_ui()
         self.SetSize(1280, 640)
         self.Center()
+
+        self.IP = None
+        self.PORT = None
+        self.serv1 = None
+
 
     def init_ui(self):
         """ This is the actual UI
@@ -50,15 +80,17 @@ class SimpleGUI(wx.Frame):
         # Menubar
         menubar = wx.MenuBar()
         fileMenu = wx.Menu()
-
-        fileConnServ = fileMenu.Append(wx.ID_ANY, 'Connect', 'Connect to a new serveer')
+        
+        fileConnServ = fileMenu.Append(wx.ID_ANY, 'Connect', 'Connect to a new server')
         fileItem = fileMenu.Append(wx.ID_EXIT, 'Quit', 'Quit Application')
 
         menubar.Append(fileMenu, '&File')
         self.SetMenuBar(menubar)
 
         self.Bind(wx.EVT_MENU, self.closewindow, fileItem)
-        self.Bind(wx.EVT_MENU, Client('127.0.0.1', 1111).connect_to_server, fileConnServ)
+        
+        # This is going to be ugle but it will have to work
+        #self.Bind(wx.EVT_MENU, self.serv1.connect_to_server, fileConnServ)
 
         
         panel = wx.Panel(self)
@@ -110,10 +142,15 @@ class SimpleGUI(wx.Frame):
         panel.SetSizer(vbox)
 
 
- 
     def send_msg_server(self, msg):
-        serv1 = Client('127.0.0.1', 4132)
-        serv1.connect_to_server(None)
+        if self.serv1 == None:
+            self.getIpPort(None)
+            self.serv1 = Client(self.IP, self.PORT)
+            self.serv1.connect_to_server()
+            print 'Connected to {} and {}'.format(self.IP, self.PORT)
+        else:
+            print 'already connected'
+            self.serv1.send_msg(msg)
 
     def send_message_gui(self, txtbox, new_msg):
         """
@@ -124,10 +161,19 @@ class SimpleGUI(wx.Frame):
         msg_dbase.append(msgs)
         # Pretty ugly, but have to put the % after %s cause it won't work otherwise
         txtbox.AppendText("%s: " % username + msgs + '\n') 
-        self.send_msg_server(msgs)
         new_msg.Clear()
         print msgs
-
+        self.send_msg_server(msg_dbase[-1])
+        
+        
+    def getIpPort(self, event):
+        IPBox = wx.TextEntryDialog(None, 'What is the IP', 'IP of Server', '127.0.0.1')
+        PORTBox = wx.TextEntryDialog(None, 'What is the PORT', 'PORT of Server', '4132')
+        if IPBox.ShowModal()==wx.ID_OK:
+            self.IP = IPBox.GetValue()
+        if PORTBox.ShowModal()==wx.ID_OK:
+            self.PORT = int(PORTBox.GetValue())
+        
 
     def closewindow(self, e):
         """
@@ -137,15 +183,10 @@ class SimpleGUI(wx.Frame):
     
 if __name__ == '__main__':
     APP = wx.App()
-    GUI1 = SimpleGUI(None, title='testing')
+    GUI1 = SimpleGUI('mainclient1', None, title='testing')
     GUI1.Show()
 
     # Connect to a server
     
     APP.MainLoop()
     
-    
-    #client1 = Client('127.0.0.1', 4132)
-    #client1.connect_to_server()
-    #client1.send_msg_server('ayyy')
-    #client1.s.close()
