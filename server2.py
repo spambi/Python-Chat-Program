@@ -4,7 +4,7 @@
 import socket
 
 IP = '127.0.0.1'
-PORT = 4132
+PORT = 1111
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((IP, PORT))

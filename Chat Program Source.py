@@ -9,6 +9,7 @@ msgs =  ''
 username = 'spambi'
 welcome_msg = "Welcome to Pype %s, this is a python based chat program that uses wx and sockets, this very much a WIP\n" % username
 msg_dbase = []
+serv_socks = []
 
 
 class Client:
@@ -20,9 +21,10 @@ class Client:
         self.s = None      
         
     # Each class run thing creates a now socket lol
-    def connect_to_server(self):
+    def connect_to_server(self, e):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((self.IP, self.PORT)) 
+        serv_socks.append(self.s)
         #print 'Connected to %s' % self.IP
         #s.sendall(msg_dbase[-1])
         #print 'sent the shit lol' 
@@ -56,9 +58,9 @@ class SimpleGUI(wx.Frame):
         self.SetMenuBar(menubar)
 
         self.Bind(wx.EVT_MENU, self.closewindow, fileItem)
+        self.Bind(wx.EVT_MENU, Client('127.0.0.1', 1111).connect_to_server, fileConnServ)
+
         
-
-
         panel = wx.Panel(self)
 
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -111,7 +113,7 @@ class SimpleGUI(wx.Frame):
  
     def send_msg_server(self, msg):
         serv1 = Client('127.0.0.1', 4132)
-        serv1.connect_server()
+        serv1.connect_to_server(None)
 
     def send_message_gui(self, txtbox, new_msg):
         """
