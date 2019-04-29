@@ -3,6 +3,32 @@ import wx
 import threading
 import time
 
+username = 'spambi'
+termDbase = []
+msgDbase = []
+
+class Client():
+
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+	def __init__(self, IP, PORT, GUI):
+		self.IP = IP
+		self.PORT = PORT
+		self.GUI = GUI
+		BF_SIZE = 2048
+
+
+	def connServ(self):
+		self.s.connect((self.IP, self.PORT))
+		self.GUI.msgHistory.AppendText('Successfully connected to: {}:{}'.format(self.IP, self.PORT))
+		termDbase.append('Successfully connected to: {}:{}'.format(self.IP, self.PORT))
+		termDbase.append(len(termDbase) + 1)
+
+	def msgServ(self, msg):
+		self.s.sendall(msg)
+		print 'sent {} to {}:{}'.format(msg, self.IP, self.PORT)
+
+
 
 class GUI(wx.Frame):
 
@@ -14,15 +40,23 @@ class GUI(wx.Frame):
 	msgWindow	= None
 	sendButton	= None
 
+	#IP 			= 'localhost'
+	#PORT 		= 1234
+	#socketConn 	= Client(self.IP, self.PORT, GUI)
+
+
 	def __init__(self, *args, **kwargs):
 		super(GUI, self).__init__(*args, **kwargs)
 
 		#self.t = threading.Thread(target = self.ui_test, name = threadname)
 		#self.t.start()
 
+		# Create new instance of socket
+
+
 		self.ui_test()
 
-		self.SetSize(1280, 640)
+		self.SetSize(640, 320)
 		self.Center()
 
 
@@ -61,9 +95,13 @@ class GUI(wx.Frame):
 
 	def msgGUI(self):
 		msg = self.msgWindow.GetValue()
-		self.msgHistory.AppendText('{}{}\n'.format(usernamemsg))
+		msgDbase.append(len(msgDbase) + 1)
+		msgDbase.append(msg)
+		self.msgHistory.AppendText('{}: {}\n'.format(username, msg))
 		self.msgWindow.Clear()
 		print msg
+
+
 
 
 if __name__ == '__main__':
@@ -72,5 +110,14 @@ if __name__ == '__main__':
     GUI1 = GUI(None, title='testing')
     GUI1.Show()
 
+    clienttest = Client('localhost', 1234, GUI1)
+    clienttest.connServ()
+
     APP.MainLoop()
     
+
+# To fix stuation where I have to reference something that doesn't exist
+# maybe like i have to use a variable not in scope to monitor eveything
+# something annoying like that I don't reall knwo tbh
+# its super late and im about to sleep
+# remember to uWu on the haters lul
