@@ -7,9 +7,13 @@ username = 'spambi'
 termDbase = []
 msgDbase = []
 
+def sendSvr(socket, msg):
+	socket.sendall(msg)
+
 class Client():
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 
 	def __init__(self, IP, PORT, GUI):
 		self.IP = IP
@@ -19,15 +23,38 @@ class Client():
 
 
 	def connServ(self):
-		self.s.connect((self.IP, self.PORT))
-		self.GUI.msgHistory.AppendText('Successfully connected to: {}:{}'.format(self.IP, self.PORT))
-		termDbase.append('Successfully connected to: {}:{}'.format(self.IP, self.PORT))
-		termDbase.append(len(termDbase) + 1)
+		try:
+			self.s.connect((self.IP, self.PORT))
+			self.GUI.msgHistory.AppendText('Successfully connected to: {} : {}'.format(self.IP, self.PORT))
+			termDbase.append('Successfully connected to: {} : {}'.format(self.IP, self.PORT))
+			termDbase.append(len(termDbase) + 1)
+
+		except:
+			self.GUI.msgHistory.AppendText('Could not connect to: {} : {}'.format(self.IP, self.PORT))
+			termDbase.append('Could not connect to: {} : {}'.format(self.IP, self.PORT))
+
+		welcome_msg = self.s.recv(BF_SIZE)
+		self.GUI.msgHistory.AppendText(welcome_msg)
+
+		print 'Starting recieve loop'
+		termDbase.append('Starting recieve loop')
+		recvMsgthread = threading.Thread(target=self.recvMsg)
+		recvMsgthread.start()
+
+	def recvMsg(self):
+		msg = self.s.recv(BF_SIZE)
+		if msg == "{quit}":
+			self.s.close()
+
+		else:
+			print 'Recieved {}'.format(msg)
+			termDbase.append('Recieved {}'.format(msg))
+			self.GUI.msgHistory.AppendText('{}\n'.format(msg))
 
 	def msgServ(self, msg):
-		self.s.sendall(msg)
+		self.s.sendall('this is a test lollol')
 		print 'sent {} to {}:{}'.format(msg, self.IP, self.PORT)
-
+		termDbase.append('sent {} to {}:{}'.format(msg, self.IP, self.PORT))
 
 
 class GUI(wx.Frame):
@@ -39,28 +66,18 @@ class GUI(wx.Frame):
 	msgHistory	= None
 	msgWindow	= None
 	sendButton	= None
-
-	#IP 			= 'localhost'
-	#PORT 		= 1234
-	#socketConn 	= Client(self.IP, self.PORT, GUI)
-
+	socket 		= None
 
 	def __init__(self, *args, **kwargs):
 		super(GUI, self).__init__(*args, **kwargs)
 
-		#self.t = threading.Thread(target = self.ui_test, name = threadname)
-		#self.t.start()
-
-		# Create new instance of socket
-
-
-		self.ui_test()
+		self.initUI()
 
 		self.SetSize(640, 320)
 		self.Center()
 
 
-	def ui_test(self):
+	def initUI(self):
 
 		self.mainPanel = wx.Panel(self)
 
@@ -84,10 +101,9 @@ class GUI(wx.Frame):
 		self.vbox.Add(self.hbox2, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
                  border=10)
 
-		self.msgWindow.AppendText('im a weeb lol, www.magicalgirls.moe/dance')
+		self.msgWindow.AppendText('im a weeb lol, www.magicalgirls.moe/dance\n')
 
-		#self.Bind(wx.EVT_BUTTON, self.msgGUI, self.sendButton)
-		self.Bind(wx.EVT_BUTTON, lambda evt: self.msgGUI(), self.sendButton)
+		self.Bind(wx.EVT_BUTTON, lambda evt: self.socket.msgServ(self.msgWindow.GetValue()), self.sendButton)
 
 		self.vbox.Add((-1, 10))
 
@@ -95,13 +111,17 @@ class GUI(wx.Frame):
 
 	def msgGUI(self):
 		msg = self.msgWindow.GetValue()
-		msgDbase.append(len(msgDbase) + 1)
-		msgDbase.append(msg)
-		self.msgHistory.AppendText('{}: {}\n'.format(username, msg))
-		self.msgWindow.Clear()
-		print msg
-
-
+		if msg == "":
+			print 'put somthing in actually diiot'
+		else:
+			msgDbase.append(len(msgDbase) + 1)
+			msgDbase.append(msg)
+			termDbase.append('Sent {} to GUI'.format(msg))
+			self.msgHistory.AppendText('{}: {}'.format(username, msg))
+			self.msgHistory.AppendText('\n')
+			self.msgWindow.Clear()
+			self.socket.msgServ(msg)
+			print msg
 
 
 if __name__ == '__main__':
@@ -110,14 +130,16 @@ if __name__ == '__main__':
     GUI1 = GUI(None, title='testing')
     GUI1.Show()
 
-    clienttest = Client('localhost', 1234, GUI1)
-    clienttest.connServ()
+    clienttest = Client('localhost', 33000, GUI1)
+
+    try:
+    	clienttest.connServ()
+    except:
+    	print 'Something went wrong'
+    	GUI1.msgHistory.AppendText('Something went wrong\n')
+    	termDbase.append('Something went wrong')
+    GUI1.socket = clienttest
+
+    clienttest.msgServ(GUI1.msgWindow.GetValue())	
 
     APP.MainLoop()
-    
-
-# To fix stuation where I have to reference something that doesn't exist
-# maybe like i have to use a variable not in scope to monitor eveything
-# something annoying like that I don't reall knwo tbh
-# its super late and im about to sleep
-# remember to uWu on the haters lul
