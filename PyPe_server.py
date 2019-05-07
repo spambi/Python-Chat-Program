@@ -5,7 +5,7 @@ clients = {}
 addresses = {}
 
 IP = 'localhost'
-PORT = 33000
+PORT = 1234
 BF_SIZE = 2048
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((IP, PORT))
@@ -18,32 +18,33 @@ def accept_incoming_connections():
         addresses[client] = client_address
         threading.Thread(target=handle_client, args=(client,)).start()
 
-def handle_client(client):  # Takes client socket as argument.
+def handle_client(clientSocket):  # Takes client socket as argument.
     """Handles a single client connection."""
 
-    username = client.recv(BF_SIZE)
+    username = clientSocket.recv(BF_SIZE)
     welcome = 'Welcome %s! If you ever want to quit, type {quit} to exit.' % username
-    client.send(welcome)
+    clientSocket.send(welcome)
+    print 'Sent {} to {}'.format(welcome, clientSocket)
     msg = "{} has joined the chat!".format(username)
     broadcast(msg)
-    clients[client] = username
+    clients[clientSocket] = username
     while True:
-        print 'testy'
-        msg = client.recv(BF_SIZE)
+        msg = clientSocket.recv(BF_SIZE)
+        print msg
         if msg != "{quit}":
             broadcast(msg, username+": ")
         else:
-            client.send("{quit}")
-            client.close()
-            del clients[client]
+            clientSocket.send("{quit}")
+            clientSocket.close()
+            del clients[clientSocket]
             broadcast("{} has left the chat.".format(username))
             break
 
 def broadcast(msg, prefix=""):  # prefix is for name identification.
     """Broadcasts a message to all the clients."""
     for sock in clients:
-        sock.send(prefix + msg)
-        print 'Sent {}'.format(msg)
+        sock.send('{}{}'.format(prefix + msg))
+        print 'Sent {} to {}'.format(msg, sock)
 
 if __name__ == "__main__":
     s.listen(10)  # Listens for 10 connections at max.

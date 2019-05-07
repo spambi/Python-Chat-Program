@@ -6,6 +6,7 @@ import time
 username = 'spambi'
 termDbase = []
 msgDbase = []
+BF_SIZE = 2048
 
 def sendSvr(socket, msg):
 	socket.sendall(msg)
@@ -13,13 +14,12 @@ def sendSvr(socket, msg):
 class Client():
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+	BF_SIZE = 2048
 
 	def __init__(self, IP, PORT, GUI):
 		self.IP = IP
 		self.PORT = PORT
 		self.GUI = GUI
-		BF_SIZE = 2048
 
 
 	def connServ(self):
@@ -28,31 +28,37 @@ class Client():
 			self.GUI.msgHistory.AppendText('Successfully connected to: {} : {}'.format(self.IP, self.PORT))
 			termDbase.append('Successfully connected to: {} : {}'.format(self.IP, self.PORT))
 			termDbase.append(len(termDbase) + 1)
+			print termDbase
 
 		except:
 			self.GUI.msgHistory.AppendText('Could not connect to: {} : {}'.format(self.IP, self.PORT))
 			termDbase.append('Could not connect to: {} : {}'.format(self.IP, self.PORT))
 
-		welcome_msg = self.s.recv(BF_SIZE)
+		self.s.sendall('lololol')
+		welcome_msg = self.s.recv(self.BF_SIZE)
 		self.GUI.msgHistory.AppendText(welcome_msg)
 
 		print 'Starting recieve loop'
 		termDbase.append('Starting recieve loop')
-		recvMsgthread = threading.Thread(target=self.recvMsg)
-		recvMsgthread.start()
+		recvLoop = threading.Thread(target = self.recvMsg)
+		recvLoop.start()
+		recvLoop.join()
 
 	def recvMsg(self):
-		msg = self.s.recv(BF_SIZE)
-		if msg == "{quit}":
-			self.s.close()
+		print 'Started siht lol'
+		while True:
+			msg = self.s.recv(BF_SIZE)
+			print 'Recieved {} from {}'.format(msg, self.IP)
+			if msg == "{quit}":
+				self.s.close()
 
 		else:
 			print 'Recieved {}'.format(msg)
-			termDbase.append('Recieved {}'.format(msg))
+			termDbase.append('Recieved {} from {}'.format(msg, self.IP))
 			self.GUI.msgHistory.AppendText('{}\n'.format(msg))
 
 	def msgServ(self, msg):
-		self.s.sendall('this is a test lollol')
+		self.s.sendall(msg)
 		print 'sent {} to {}:{}'.format(msg, self.IP, self.PORT)
 		termDbase.append('sent {} to {}:{}'.format(msg, self.IP, self.PORT))
 
@@ -68,10 +74,11 @@ class GUI(wx.Frame):
 	sendButton	= None
 	socket 		= None
 
-	def __init__(self, *args, **kwargs):
+	def __init__(self, threadname, *args, **kwargs):
 		super(GUI, self).__init__(*args, **kwargs)
 
-		self.initUI()
+		self.clientThread = threading.Thread(target = self.initUI, name = threadname)
+		self.clientThread.start()
 
 		self.SetSize(640, 320)
 		self.Center()
@@ -103,7 +110,7 @@ class GUI(wx.Frame):
 
 		self.msgWindow.AppendText('im a weeb lol, www.magicalgirls.moe/dance\n')
 
-		self.Bind(wx.EVT_BUTTON, lambda evt: self.socket.msgServ(self.msgWindow.GetValue()), self.sendButton)
+		self.Bind(wx.EVT_BUTTON, lambda evt: self.msgGUI(), self.sendButton)
 
 		self.vbox.Add((-1, 10))
 
@@ -127,19 +134,14 @@ class GUI(wx.Frame):
 if __name__ == '__main__':
 	
     APP = wx.App()
-    GUI1 = GUI(None, title='testing')
+    GUI1 = GUI('lol', None, title='testing')
     GUI1.Show()
 
-    clienttest = Client('localhost', 33000, GUI1)
+    clienttest = Client('localhost', 1234, GUI1)
 
-    try:
-    	clienttest.connServ()
-    except:
-    	print 'Something went wrong'
-    	GUI1.msgHistory.AppendText('Something went wrong\n')
-    	termDbase.append('Something went wrong')
     GUI1.socket = clienttest
+    clienttest.connServ()
 
-    clienttest.msgServ(GUI1.msgWindow.GetValue())	
+    clienttest.msgServ('test')
 
     APP.MainLoop()
