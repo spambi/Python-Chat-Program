@@ -37,30 +37,31 @@ class Client():
 		self.s.sendall('lololol')
 		welcome_msg = self.s.recv(self.BF_SIZE)
 		self.GUI.msgHistory.AppendText(welcome_msg)
+		print 'got that shit lol'
 
 		print 'Starting recieve loop'
 		termDbase.append('Starting recieve loop')
 		recvLoop = threading.Thread(target = self.recvMsg)
 		recvLoop.start()
-		recvLoop.join()
 
 	def recvMsg(self):
-		print 'Started siht lol'
 		while True:
+			print 'Started recieve loop'
 			msg = self.s.recv(BF_SIZE)
 			print 'Recieved {} from {}'.format(msg, self.IP)
 			if msg == "{quit}":
 				self.s.close()
 
-		else:
-			print 'Recieved {}'.format(msg)
-			termDbase.append('Recieved {} from {}'.format(msg, self.IP))
-			self.GUI.msgHistory.AppendText('{}\n'.format(msg))
+			else:
+				print 'Recieved {}'.format(msg)
+				termDbase.append('Recieved {} from {}'.format(msg, self.IP))
+				self.GUI.msgHistory.AppendText('{}\n'.format(msg))
 
 	def msgServ(self, msg):
 		self.s.sendall(msg)
 		print 'sent {} to {}:{}'.format(msg, self.IP, self.PORT)
 		termDbase.append('sent {} to {}:{}'.format(msg, self.IP, self.PORT))
+		self.GUI.msgWindow.Clear()
 
 
 class GUI(wx.Frame):
@@ -74,11 +75,13 @@ class GUI(wx.Frame):
 	sendButton	= None
 	socket 		= None
 
-	def __init__(self, threadname, *args, **kwargs):
+	def __init__(self, *args, **kwargs):
 		super(GUI, self).__init__(*args, **kwargs)
 
-		self.clientThread = threading.Thread(target = self.initUI, name = threadname)
-		self.clientThread.start()
+		#self.clientThread = threading.Thread(target = self.initUI, name = threadname)
+		#self.clientThread.start()
+
+		self.initUI()
 
 		self.SetSize(640, 320)
 		self.Center()
@@ -110,7 +113,7 @@ class GUI(wx.Frame):
 
 		self.msgWindow.AppendText('im a weeb lol, www.magicalgirls.moe/dance\n')
 
-		self.Bind(wx.EVT_BUTTON, lambda evt: self.msgGUI(), self.sendButton)
+		self.Bind(wx.EVT_BUTTON, lambda evt: self.socket.msgServ(self.msgWindow.GetValue()), self.sendButton)
 
 		self.vbox.Add((-1, 10))
 
@@ -134,7 +137,7 @@ class GUI(wx.Frame):
 if __name__ == '__main__':
 	
     APP = wx.App()
-    GUI1 = GUI('lol', None, title='testing')
+    GUI1 = GUI(None, title='testing')
     GUI1.Show()
 
     clienttest = Client('localhost', 1234, GUI1)

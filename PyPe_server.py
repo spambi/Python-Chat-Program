@@ -32,7 +32,7 @@ def handle_client(clientSocket):  # Takes client socket as argument.
         msg = clientSocket.recv(BF_SIZE)
         print msg
         if msg != "{quit}":
-            broadcast(msg, username+": ")
+            broadcast(username + ": " + msg)
         else:
             clientSocket.send("{quit}")
             clientSocket.close()
@@ -43,7 +43,7 @@ def handle_client(clientSocket):  # Takes client socket as argument.
 def broadcast(msg, prefix=""):  # prefix is for name identification.
     """Broadcasts a message to all the clients."""
     for sock in clients:
-        sock.send('{}{}'.format(prefix + msg))
+        sock.send(prefix + msg)
         print 'Sent {} to {}'.format(msg, sock)
 
 if __name__ == "__main__":
