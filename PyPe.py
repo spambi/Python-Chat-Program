@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import socket
 import wx
 import threading
@@ -21,15 +22,17 @@ class Client():
 
     def recvMsg(self):
         while True:
-           msg = self.s.recv(BF_SIZE)
-           print 'Recieved {} from {}'.format(msg, self.IP)
-           if msg == "{quit}":
-               self.s.close()
+            msg = self.s.recv(BF_SIZE)
+            print 'Recieved {} from {}'.format(msg, self.IP)
+            if msg == "{quit}":
+                self.GUI.msgHistory.AppendText('You have requested to leave the chat')
+                self.s.close()
+                self.GUI.msgHistory.AppendText('You have left the chat')
 
-           else:
-               print 'Recieved {}'.format(msg)
-               termDbase.append('Recieved {} from {}'.format(msg, self.IP))
-               self.GUI.msgHistory.AppendText('{}\n'.format(msg))
+            else:
+                print 'Recieved {}'.format(msg)
+                termDbase.append('Recieved {} from {}'.format(msg, self.IP))
+                self.GUI.msgHistory.AppendText('{}\n'.format(msg))
 
     def msgServ(self, msg):
         self.s.sendall(msg)
@@ -46,7 +49,7 @@ class Client():
             print termDbase
 
         except:
-            self.GUI.msgHistory.AppendText('Could not connect to: {} : {}'.format(self.IP, self.PORT))
+            self.GUI.msgHistory.AppendText('Could not connect to: {} : {}\n'.format(self.IP, self.PORT))
             termDbase.append('Could not connect to: {} : {}'.format(self.IP, self.PORT))
 
             self.s.sendall(username)
@@ -58,7 +61,6 @@ class Client():
             termDbase.append('Starting recieve loop')
             recvLoop = threading.Thread(target = self.recvMsg)
             recvLoop.start()
-
 
 
 class GUI(wx.Frame):
@@ -83,38 +85,37 @@ class GUI(wx.Frame):
         self.SetSize(640, 320)
         self.Center()
 
-
     def initUI(self):
 
-       self.mainPanel = wx.Panel(self)
+        self.mainPanel = wx.Panel(self)
 
-       self.vbox = wx.BoxSizer(wx.VERTICAL)
-       # Horizontal Boxes, set name later
-       self.hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-       self.hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-       # Text Ctrls
-       self.msgHistory = wx.TextCtrl(self.mainPanel, style=wx.TE_READONLY | wx.TE_MULTILINE |
-                                                               wx.TE_AUTO_URL)
-       self.msgWindow = wx.TextCtrl(self.mainPanel, style=wx.TE_MULTILINE | wx.TE_AUTO_URL )
-       # Buttons etc,
-       self.sendButton = wx.Button(self.mainPanel, label="Send", size=(50, 39))
-       
+        self.vbox = wx.BoxSizer(wx.VERTICAL)
+        # Horizontal Boxes, set name later
+        self.hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        self.hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        # Text Ctrls
+        self.msgHistory = wx.TextCtrl(self.mainPanel, style=wx.TE_READONLY |
+                                      wx.TE_MULTILINE | wx.TE_AUTO_URL)
+        self.msgWindow = wx.TextCtrl(self.mainPanel, style=wx.TE_MULTILINE |
+                                     wx.TE_AUTO_URL)
+        # Buttons etc,
+        self.sendButton = wx.Button(self.mainPanel, label="Send", size=(50, 39))
 
-       self.hbox1.Add(self.msgHistory, proportion=1, flag=wx.EXPAND)
-       self.hbox2.Add(self.msgWindow, proportion=1, flag=wx.EXPAND)
-       self.hbox2.Add(self.sendButton, flag= wx.EXPAND | wx.RIGHT, border=10)
-       self.vbox.Add(self.hbox1, proportion=1, flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, border=10)
+        self.hbox1.Add(self.msgHistory, proportion=1, flag=wx.EXPAND)
+        self.hbox2.Add(self.msgWindow, proportion=1, flag=wx.EXPAND)
+        self.hbox2.Add(self.sendButton, flag= wx.EXPAND | wx.RIGHT, border=10)
+        self.vbox.Add(self.hbox1, proportion=1, flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, border=10)
 
-       self.vbox.Add(self.hbox2, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
-        border=10)
+        self.vbox.Add(self.hbox2, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
+                      border=10)
 
-       self.msgWindow.AppendText('im a weeb lol, www.magicalgirls.moe/dance\n')
+        self.msgWindow.AppendText('im a weeb lol, www.magicalgirls.moe/dance\n')
 
-       self.Bind(wx.EVT_BUTTON, lambda evt: self.socket.msgServ(self.msgWindow.GetValue()), self.sendButton)
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.socket.msgServ(self.msgWindow.GetValue()), self.sendButton)
 
-       self.vbox.Add((-1, 10))
+        self.vbox.Add((-1, 10))
 
-       self.mainPanel.SetSizer(self.vbox)
+        self.mainPanel.SetSizer(self.vbox)
 
     def msgGUI(self):
         msg = self.msgWindow.GetValue()

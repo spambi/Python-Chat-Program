@@ -24,11 +24,11 @@ def handle_client(clientSocket):  # Takes client socket as argument.
     """Handles a single client connection."""
 
     username = clientSocket.recv(BF_SIZE)
-    welcome = 'Welcome %s! If you ever want to quit, type {quit} \
-    to exit.' % username
+    welcome = 'Welcome %s!\n If you ever want to quit, type {quit} \
+    to exit.\n' % username
     clientSocket.send(welcome)
-    print 'Sent {} to {}'.format(welcome, clientSocket)
-    msg = "{} has joined the chat!".format(username)
+    print '[+] Sent {} to {}'.format(welcome, clientSocket)
+    msg = "\n[+] {} has joined the chat!".format(username)
     broadcast(msg)
     clients[clientSocket] = username
     while True:
@@ -40,14 +40,14 @@ def handle_client(clientSocket):  # Takes client socket as argument.
             clientSocket.send("{quit}")
             clientSocket.close()
             del clients[clientSocket]
-            broadcast("{} has left the chat.".format(username))
+            broadcast("\n[-] {} has left the chat.".format(username))
             break
 
 
 def broadcast(msg, prefix=""):  # prefix is for name identification.
     """Broadcasts a message to all the clients."""
     for sock in clients:
-        sock.send(prefix + msg)
+        sock.send('\n' +prefix + msg)
         print 'Sent {} to {}'.format(msg, sock)
 
 
